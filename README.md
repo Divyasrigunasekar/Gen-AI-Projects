@@ -40,7 +40,29 @@ A UI-driven prompt builder that generates production-ready customer support prom
 python support_prompt_app.py
 ```
 
-### 3. Self-Reflecting Code Review Agent (code_review_agent.py / code_review_app.py)
+### 3. Math Solver (math_app.py / math_cot_solver.py)
+An AI-powered math problem solver that uses **Chain-of-Thought** reasoning to break down complex math problems into clear, step-by-step solutions.
+
+**Features:**
+- Step-by-step mathematical reasoning
+- Supports algebra, calculus, and general math problems
+- Clear, pedagogical explanations for each step
+- Web interface at `http://localhost:5001`
+- Copy-paste ready solutions for learning and validation
+
+**Usage:**
+```bash
+# Set API key
+$env:GROQ_API_KEY="your-groq-key"
+
+# Run CLI version
+python math_cot_solver.py
+
+# Run web version
+python math_app.py
+```
+
+### 4. Self-Reflecting Code Review Agent (code_review_agent.py / code_review_app.py)
 An AI-powered code review system that analyzes Python code using AST, generates feedback, and then self-reflects to improve its own suggestions.
 
 **Features:**
