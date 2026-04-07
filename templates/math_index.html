@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chain-of-Thought Math Solver</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        button {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4facfe;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+        }
+
+        .result-section {
+            margin-bottom: 30px;
+        }
+
+        .result-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #4facfe;
+        }
+
+        .step {
+            background: #f9f9f9;
+            border-left: 4px solid #4facfe;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .step-number {
+            font-weight: 600;
+            color: #4facfe;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .step-reasoning {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .final-answer {
+            background: linear-gradient(135deg, #4facfe15 0%, #00f2fe15 100%);
+            border-left: 4px solid #00f2fe;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .validation {
+            background: #f0f7ff;
+            border-left: 4px solid #4facfe;
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 0.95em;
+            color: #333;
+        }
+
+        .error {
+            background: #fee;
+            border-left: 4px solid #f44;
+            padding: 15px;
+            border-radius: 4px;
+            color: #c33;
+            margin-bottom: 20px;
+        }
+
+        .info {
+            background: #eef;
+            border-left: 4px solid #4facfe;
+            padding: 15px;
+            border-radius: 4px;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+        }
+
+        .examples {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .examples h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .examples ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .examples li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+            color: #666;
+        }
+
+        .examples li:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 Chain-of-Thought Math Solver</h1>
+        <p class="subtitle">Solve math problems with step-by-step reasoning</p>
+
+        <div class="info">
+            <strong>How it works:</strong> Enter any math problem and watch the AI reason through it step-by-step using Chain-of-Thought prompting.
+        </div>
+
+        <div class="examples">
+            <h3>Try these examples:</h3>
+            <ul>
+                <li>Solve for x: 3x + 7 = 22</li>
+                <li>What is 15 + 27?</li>
+                <li>A train travels 120 km in 2 hours. What is its speed?</li>
+                <li>Simplify: (2x + 3)(x - 1)</li>
+            </ul>
+        </div>
+
+        <div class="input-group">
+            <input
+                type="text"
+                id="problemInput"
+                placeholder="Enter a math problem... (e.g., Solve for x: 2x - 5 = 11)"
+                onkeypress="if(event.key==='Enter') solveProblem()"
+            >
+            <button onclick="solveProblem()" id="solveBtn">Solve</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Thinking through the problem...</p>
+        </div>
+
+        <div class="results" id="results">
+            <div id="errorContainer"></div>
+            <div class="result-section" id="stepsContainer" style="display: none;">
+                <div class="result-title">🔢 Reasoning Steps</div>
+                <div id="stepsList"></div>
+            </div>
+            <div class="result-section" id="answerContainer" style="display: none;">
+                <div class="result-title">✨ Final Answer</div>
+                <div class="final-answer" id="answerText"></div>
+            </div>
+            <div class="result-section" id="validationContainer" style="display: none;">
+                <div class="result-title">✅ Validation</div>
+                <div class="validation" id="validationText"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function solveProblem() {
+            const problem = document.getElementById('problemInput').value.trim();
+
+            if (!problem) {
+                alert('Please enter a math problem');
+                return;
+            }
+
+            const solveBtn = document.getElementById('solveBtn');
+            solveBtn.disabled = true;
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/solve', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ problem: problem })
+                });
+
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                displayError('Network error: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                solveBtn.disabled = false;
+            }
+        }
+
+        function displayResults(data) {
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('errorContainer').innerHTML = '';
+            document.getElementById('stepsContainer').style.display = 'none';
+            document.getElementById('answerContainer').style.display = 'none';
+            document.getElementById('validationContainer').style.display = 'none';
+
+            if (data.error) {
+                displayError(data.error);
+                return;
+            }
+
+            // Display steps
+            if (data.steps && data.steps.length > 0) {
+                document.getElementById('stepsContainer').style.display = 'block';
+                displaySteps(data.steps);
+            }
+
+            // Display final answer
+            if (data.final_answer) {
+                document.getElementById('answerContainer').style.display = 'block';
+                document.getElementById('answerText').textContent = data.final_answer;
+            }
+
+            // Display validation
+            if (data.validation) {
+                document.getElementById('validationContainer').style.display = 'block';
+                displayValidation(data.validation);
+            }
+        }
+
+        function displaySteps(steps) {
+            let html = '';
+
+            steps.forEach((step, index) => {
+                html += '<div class="step">';
+                html += `<div class="step-number">Step ${step.step}</div>`;
+                html += `<div class="step-reasoning">${escapeHtml(step.reasoning)}</div>`;
+                html += '</div>';
+            });
+
+            document.getElementById('stepsList').innerHTML = html;
+        }
+
+        function displayValidation(validation) {
+            let html = `<strong>Steps:</strong> ${validation.step_count}<br>`;
+            html += `<strong>Has Answer:</strong> ${validation.has_answer ? 'Yes' : 'No'}<br>`;
+            html += `<strong>Has Steps:</strong> ${validation.has_steps ? 'Yes' : 'No'}<br>`;
+
+            if (validation.warnings && validation.warnings.length > 0) {
+                html += `<strong>Warnings:</strong><br>`;
+                validation.warnings.forEach(warning => {
+                    html += `• ${escapeHtml(warning)}<br>`;
+                });
+            } else {
+                html += `<strong>Status:</strong> All checks passed!`;
+            }
+
+            document.getElementById('validationText').innerHTML = html;
+        }
+
+        function displayError(error) {
+            document.getElementById('errorContainer').innerHTML = `<div class="error"><strong>Error:</strong> ${escapeHtml(error)}</div>`;
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Focus input on load
+        window.addEventListener('load', () => {
+            document.getElementById('problemInput').focus();
+        });
+    </script>
+</body>
+</html>

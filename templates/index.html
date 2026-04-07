@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReAct Agent - Question Answering</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+        }
+
+        .result-section {
+            margin-bottom: 30px;
+        }
+
+        .result-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .step {
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .step-number {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .step-thinking {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .step-thinking strong {
+            color: #333;
+        }
+
+        .step-action {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-top: 8px;
+        }
+
+        .step-observation {
+            background: #f0f7ff;
+            border-left: 2px solid #667eea;
+            padding: 10px 12px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 0.95em;
+            color: #333;
+        }
+
+        .final-answer {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-left: 4px solid #764ba2;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .error {
+            background: #fee;
+            border-left: 4px solid #f44;
+            padding: 15px;
+            border-radius: 4px;
+            color: #c33;
+            margin-bottom: 20px;
+        }
+
+        .info {
+            background: #eef;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 4px;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 ReAct Agent</h1>
+        <p class="subtitle">Ask anything and watch the AI reason step-by-step</p>
+
+        <div class="info">
+            <strong>How it works:</strong> The agent thinks through your question, decides whether to search the web, and provides an answer based on its reasoning.
+        </div>
+
+        <div class="input-group">
+            <input 
+                type="text" 
+                id="questionInput" 
+                placeholder="Ask me anything... (e.g., What is the current population of Japan?)"
+                onkeypress="if(event.key==='Enter') askQuestion()"
+            >
+            <button onclick="askQuestion()" id="submitBtn">Ask</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Thinking and searching...</p>
+        </div>
+
+        <div class="results" id="results">
+            <div id="errorContainer"></div>
+            <div class="result-section" id="stepsContainer" style="display: none;">
+                <div class="result-title">⚙️ Reasoning Steps</div>
+                <div id="stepsList"></div>
+            </div>
+            <div class="result-section" id="answerContainer" style="display: none;">
+                <div class="result-title">✨ Final Answer</div>
+                <div class="final-answer" id="answerText"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function askQuestion() {
+            const question = document.getElementById('questionInput').value.trim();
+            
+            if (!question) {
+                alert('Please enter a question');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: question })
+                });
+
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                displayError('Network error: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        }
+
+        function displayResults(data) {
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('errorContainer').innerHTML = '';
+            document.getElementById('stepsContainer').style.display = 'none';
+            document.getElementById('answerContainer').style.display = 'none';
+
+            if (!data.success) {
+                displayError(data.error);
+                return;
+            }
+
+            // Display steps
+            if (data.steps && data.steps.length > 0) {
+                document.getElementById('stepsContainer').style.display = 'block';
+                displaySteps(data.steps);
+            }
+
+            // Display final answer
+            if (data.final_answer) {
+                document.getElementById('answerContainer').style.display = 'block';
+                document.getElementById('answerText').textContent = data.final_answer;
+            }
+        }
+
+        function displaySteps(steps) {
+            let html = '';
+            
+            steps.forEach((step, index) => {
+                html += '<div class="step">';
+                html += `<div class="step-number">Step ${step.step}</div>`;
+                
+                if (step.thinking) {
+                    html += `<div class="step-thinking">${escapeHtml(step.thinking)}</div>`;
+                }
+                
+                if (step.action) {
+                    html += `<div style="margin-top: 10px;"><span class="step-action">${escapeHtml(step.action)}</span></div>`;
+                }
+                
+                if (step.observation) {
+                    html += `<div class="step-observation"><strong>🔍 Observation:</strong> ${escapeHtml(step.observation)}</div>`;
+                }
+                
+                html += '</div>';
+            });
+            
+            document.getElementById('stepsList').innerHTML = html;
+        }
+
+        function displayError(error) {
+            document.getElementById('errorContainer').innerHTML = `<div class="error"><strong>Error:</strong> ${escapeHtml(error)}</div>`;
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Focus input on load
+        window.addEventListener('load', () => {
+            document.getElementById('questionInput').focus();
+        });
+    </script>
+</body>
+</html>
