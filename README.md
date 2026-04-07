@@ -25,14 +25,15 @@ python react_agent.py
 python app.py
 ```
 
-### 2. Chain-of-Thought Math Solver (math_cot_solver.py / math_app.py)
-A math problem solver that uses **Chain-of-Thought** prompting to solve complex math problems with explicit step-by-step reasoning.
+### 3. Self-Reflecting Code Review Agent (code_review_agent.py / code_review_app.py)
+An AI-powered code review system that analyzes Python code using AST, generates feedback, and then self-reflects to improve its own suggestions.
 
 **Features:**
-- Supports arithmetic, algebra, and word problems
-- Step-by-step reasoning with validation
-- Web interface at `http://localhost:5001`
-- Educational tool for learning math problem-solving
+- AST-based structural analysis (detects syntax errors, complexity, mutable defaults)
+- AI-generated initial code review (bugs, style, performance)
+- Self-reflection mechanism for more accurate feedback
+- Web interface at `http://localhost:5002`
+- Prevents hallucinations by grounding suggestions in code analysis
 
 **Usage:**
 ```bash
@@ -40,10 +41,10 @@ A math problem solver that uses **Chain-of-Thought** prompting to solve complex 
 $env:GROQ_API_KEY="your-groq-key"
 
 # Run CLI version
-python math_cot_solver.py
+python code_review_agent.py
 
 # Run web version
-python math_app.py
+python code_review_app.py
 ```
 
 ## Setup
@@ -67,6 +68,25 @@ python math_app.py
 4. **Run the applications:**
    - ReAct Agent: `python app.py` (opens at http://localhost:5000)
    - Math Solver: `python math_app.py` (opens at http://localhost:5001)
+   - Code Review: `python code_review_app.py` (opens at http://localhost:5002)
+
+## Repository Structure
+
+```
+Gen-AI-Projects/
+├── app.py                 # ReAct web app
+├── math_app.py           # Math solver web app
+├── code_review_app.py    # Code review web app
+├── react_agent.py        # ReAct CLI
+├── math_cot_solver.py    # Math solver CLI
+├── code_review_agent.py  # Code review CLI
+├── templates/
+│   ├── index.html        # ReAct UI
+│   ├── math_index.html   # Math UI
+│   └── code_review.html  # Code review UI
+├── README.md             # Documentation
+└── .gitignore            # Exclusions
+```
 
 ## Architecture
 
@@ -97,6 +117,10 @@ Problem → Step 1 → Step 2 → ... → Final Answer
 ### Math Solver
 - Input: "Solve for x: 3x + 7 = 22"
 - Output: Step 1: Subtract 7 → Step 2: Divide by 3 → Answer: x = 5
+
+### Code Review Agent
+- Input: Python function with mutable default
+- Output: AST analysis → Initial review → Self-reflection → Refined review
 
 ## Contributing
 
