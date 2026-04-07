@@ -25,6 +25,21 @@ python react_agent.py
 python app.py
 ```
 
+### 2. Support Prompt Generator (support_prompt_app.py)
+A UI-driven prompt builder that generates production-ready customer support prompts for ReAct, Chain-of-Thought, and Self-Reflection patterns.
+
+**Features:**
+- Build prompts for realistic customer support scenarios
+- Choose between ReAct, CoT, and Self-Reflection templates
+- Copy-paste ready output for OpenAI Playground or notebooks
+- Web interface at `http://localhost:5003`
+
+**Usage:**
+```bash
+# Run web version
+python support_prompt_app.py
+```
+
 ### 3. Self-Reflecting Code Review Agent (code_review_agent.py / code_review_app.py)
 An AI-powered code review system that analyzes Python code using AST, generates feedback, and then self-reflects to improve its own suggestions.
 
@@ -69,6 +84,7 @@ python code_review_app.py
    - ReAct Agent: `python app.py` (opens at http://localhost:5000)
    - Math Solver: `python math_app.py` (opens at http://localhost:5001)
    - Code Review: `python code_review_app.py` (opens at http://localhost:5002)
+   - Support Prompt Generator: `python support_prompt_app.py` (opens at http://localhost:5003)
 
 ## Repository Structure
 
@@ -77,13 +93,15 @@ Gen-AI-Projects/
 ├── app.py                 # ReAct web app
 ├── math_app.py           # Math solver web app
 ├── code_review_app.py    # Code review web app
+├── support_prompt_app.py # Support prompt generator web app
 ├── react_agent.py        # ReAct CLI
 ├── math_cot_solver.py    # Math solver CLI
 ├── code_review_agent.py  # Code review CLI
 ├── templates/
 │   ├── index.html        # ReAct UI
 │   ├── math_index.html   # Math UI
-│   └── code_review.html  # Code review UI
+│   ├── code_review.html  # Code review UI
+│   └── support_prompt.html # Support prompt UI
 ├── README.md             # Documentation
 └── .gitignore            # Exclusions
 ```

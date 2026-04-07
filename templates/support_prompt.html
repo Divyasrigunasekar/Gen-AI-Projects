@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Prompt Generator</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            width: min(1200px, 100%);
+            background: #111827;
+            border-radius: 20px;
+            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.6);
+            padding: 32px;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.25rem;
+        }
+        p.subtitle {
+            margin-top: 0;
+            color: #94a3b8;
+            margin-bottom: 1.75rem;
+        }
+        .grid {
+            display: grid;
+            gap: 24px;
+        }
+        .controls {
+            display: grid;
+            gap: 16px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+            font-weight: 600;
+        }
+        textarea, select {
+            width: 100%;
+            border-radius: 14px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 16px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+            font-size: 0.95rem;
+            min-height: 120px;
+        }
+        textarea {
+            min-height: 180px;
+            resize: vertical;
+        }
+        button {
+            border: none;
+            background: linear-gradient(135deg, #2563eb, #8b5cf6);
+            color: white;
+            border-radius: 12px;
+            padding: 14px 22px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 38px rgba(59, 130, 246, 0.25);
+        }
+        .prompt-output {
+            white-space: pre-wrap;
+            background: #111827;
+            border: 1px solid #334155;
+            padding: 20px;
+            border-radius: 16px;
+            line-height: 1.6;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+            color: #e2e8f0;
+            min-height: 280px;
+            overflow-x: auto;
+        }
+        .info-box {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 20px;
+        }
+        .flex-row {
+            display: grid;
+            gap: 24px;
+        }
+        @media (min-width: 900px) {
+            .flex-row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Support Prompt Generator</h1>
+        <p class="subtitle">Choose a customer support prompt style, enter a query, and get a production-ready prompt.</p>
+
+        <form method="post" class="grid">
+            <div class="controls">
+                <div>
+                    <label>Prompt Pattern</label>
+                    <div style="display: grid; gap: 10px; padding: 12px; border: 1px solid #334155; border-radius: 14px; background: #0f172a;">
+                        {% for key, value in templates.items() %}
+                        <label style="display: flex; align-items: center; gap: 10px; font-weight: 500; color: #e2e8f0;">
+                            <input type="checkbox" name="templates" value="{{ key }}" {% if key in selected %}checked{% endif %}>
+                            {{ value.title }}
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <small style="color: #94a3b8;">Select one or more prompt patterns.</small>
+                </div>
+                <div>
+                    <label for="customer_query">Customer Query</label>
+                    <textarea id="customer_query" name="customer_query" placeholder="Enter a customer support question or issue...">{{ customer_query }}</textarea>
+                </div>
+                <button type="submit">Generate Prompt</button>
+            </div>
+        </form>
+
+        <div class="flex-row" style="margin-top: 24px;">
+            <div class="info-box">
+                <strong>How to use</strong>
+                <p>Select one or more patterns that fit your support workflow, paste your customer question, and generate a prompt ready for OpenAI Playground or your development environment.</p>
+            </div>
+            <div class="info-box">
+                <strong>Available patterns</strong>
+                <ul style="margin: 0; padding-left: 18px; color: #cbd5e1;">
+                    <li><strong>ReAct</strong> - tool-enabled reasoning before answer.</li>
+                    <li><strong>CoT</strong> - step-by-step reasoning.</li>
+                    <li><strong>Self-Reflection</strong> - improves the first draft response.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="prompt-output" style="margin-top: 24px;">{{ prompt_text }}</div>
+    </div>
+</body>
+</html>
