@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Document Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel">
+            <h1 class="gradient-text">Document AI</h1>
+            <p class="subtitle">Upload your PDF and ask anything.</p>
+            
+            <div class="upload-container">
+                <input type="file" id="pdfFile" accept="application/pdf" hidden>
+                <label for="pdfFile" class="upload-btn">Choose PDF</label>
+                <span id="fileName">No file chosen</span>
+                <button id="uploadSubmit" class="primary-btn" disabled>Upload & Index</button>
+            </div>
+            
+            <div id="uploadStatus" class="status-message"></div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-area">
+            <div class="chat-container glass-panel" id="chatBox">
+                <!-- Chat messages will appear here -->
+                <div class="message ai-message">
+                    <div class="message-content">
+                        Hello! I am your AI Document Assistant powered by Groq and Llama 3. Upload a PDF manual on the left to begin, and then ask me anything!
+                    </div>
+                </div>
+            </div>
+            
+            <div class="input-container glass-panel">
+                <input type="text" id="queryInput" placeholder="Ask about your document..." autocomplete="off">
+                <button id="sendBtn" class="primary-btn">Send</button>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
