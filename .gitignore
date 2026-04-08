@@ -51,6 +51,9 @@ instance/
 
 # Temporary files
 *.tmp
-*.temp.env 
-apikey.txt 
-.env 
+
+# API Keys (never commit these!)
+.env
+.env.local
+.env.*.local
+apikey.txt
