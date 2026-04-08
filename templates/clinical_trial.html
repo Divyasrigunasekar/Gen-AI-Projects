@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Trial Eligibility System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 16px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 12px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            margin: 16px 0;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .result-section {
+            margin-bottom: 16px;
+        }
+        
+        .result-section h3 {
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .badge.eligible {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge.ineligible {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .badge.review {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .score {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 12px 0;
+        }
+        
+        .reasoning-list {
+            list-style: none;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #555;
+        }
+        
+        .reasoning-list li {
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .reasoning-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .reasoning-list li:before {
+            content: "→ ";
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 12px 16px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            color: #666;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .audit-trail {
+            font-size: 12px;
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Clinical Trial Eligibility System</h1>
+            <p>LangChain-powered patient eligibility screening with AI reasoning and audit trails</p>
+        </div>
+        
+        <div class="grid">
+            <!-- PROTOCOL UPLOAD -->
+            <div class="card">
+                <h2>Step 1: Upload Trial Protocol</h2>
+                <div class="form-group">
+                    <label>Protocol Name</label>
+                    <input type="text" id="protocolName" placeholder="e.g., Diabetes Management Trial 2024">
+                </div>
+                <div class="form-group">
+                    <label>Protocol Text (Eligibility Criteria)</label>
+                    <textarea id="protocolText" placeholder="Paste trial eligibility criteria here...
+
+Example:
+INCLUSION CRITERIA:
+- Age 18-65
+- Type 2 Diabetes diagnosed
+- HbA1c 7.5-10%
+
+EXCLUSION CRITERIA:
+- Pregnancy
+- eGFR < 30
+- Active cancer"></textarea>
+                </div>
+                <button onclick="uploadProtocol()">Parse Protocol</button>
+                <div class="loading" id="protocolLoading">
+                    <div class="spinner"></div>
+                    <p>Analyzing protocol...</p>
+                </div>
+                <div id="protocolAlert"></div>
+                <div id="protocolResult"></div>
+            </div>
+            
+            <!-- PATIENT ELIGIBILITY CHECK -->
+            <div class="card">
+                <h2>Step 2: Check Patient Eligibility</h2>
+                <div class="form-group">
+                    <label>Select Protocol</label>
+                    <select id="protocolSelect">
+                        <option value="">-- No protocol loaded --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Patient Name</label>
+                    <input type="text" id="patientName" placeholder="e.g., John Smith">
+                </div>
+                <div class="form-group">
+                    <label>Patient EHR Data</label>
+                    <textarea id="ehrText" placeholder="Paste patient clinical data...
+
+Example:
+Patient: Age 45, Male
+Medical History: Type 2 Diabetes (5 years)
+Labs:
+- HbA1c: 8.2%
+- eGFR: 65 mL/min
+- Creatinine: 1.0 mg/dL
+Medications: Metformin 500mg BID
+Comorbidities: Hypertension (controlled)
+Pregnancy Status: N/A"></textarea>
+                </div>
+                <button onclick="checkEligibility()">Check Eligibility</button>
+                <div class="loading" id="eligibilityLoading">
+                    <div class="spinner"></div>
+                    <p>Evaluating eligibility...</p>
+                </div>
+                <div id="eligibilityAlert"></div>
+                <div id="eligibilityResult"></div>
+            </div>
+        </div>
+        
+        <!-- RESULTS DASHBOARD -->
+        <div class="card">
+            <h2>📊 Decision History & Audit Trail</h2>
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('decisions')">All Decisions</button>
+                <button class="tab" onclick="switchTab('audit')">Audit Report</button>
+            </div>
+            
+            <div id="decisions" class="tab-content active">
+                <button onclick="loadDecisions()" style="margin-bottom: 16px;">Load Decisions</button>
+                <div id="decisionsList"></div>
+            </div>
+            
+            <div id="audit" class="tab-content">
+                <button onclick="exportAuditReport()" style="margin-bottom: 16px;">Export Full Audit Report</button>
+                <div id="auditReport"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentProtocolId = null;
+        
+        async function uploadProtocol() {
+            const name = document.getElementById("protocolName").value;
+            const text = document.getElementById("protocolText").value;
+            
+            if (!name || !text) {
+                showAlert("protocolAlert", "Protocol name and text required", "error");
+                return;
+            }
+            
+            const loading = document.getElementById("protocolLoading");
+            const alert = document.getElementById("protocolAlert");
+            const result = document.getElementById("protocolResult");
+            
+            loading.style.display = "block";
+            alert.innerHTML = "";
+            result.innerHTML = "";
+            
+            try {
+                const response = await fetch("/api/upload-protocol", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ protocol_name: name, protocol_text: text })
+                });
+                
+                const data = await response.json();
+                loading.style.display = "none";
+                
+                if (response.ok) {
+                    currentProtocolId = data.protocol_id;
+                    showAlert("protocolAlert", `✓ Protocol loaded: ${data.protocol_id}`, "success");
+                    
+                    // Update protocol selector
+                    const select = document.getElementById("protocolSelect");
+                    const option = document.createElement("option");
+                    option.value = data.protocol_id;
+                    option.textContent = `${name} (${data.protocol_id})`;
+                    option.selected = true;
+                    select.appendChild(option);
+                    
+                    // Show extracted criteria
+                    result.innerHTML = `
+                        <div class="result">
+                            <div class="result-section">
+                                <h3>Extracted Inclusion Criteria</h3>
+                                <ul class="reasoning-list" style="list-style: disc; padding-left: 20px;">
+                                    ${data.extracted_criteria.inclusion.map(c => `<li>${c}</li>`).join("")}
+                                </ul>
+                            </div>
+                            <div class="result-section">
+                                <h3>Extracted Exclusion Criteria</h3>
+                                <ul class="reasoning-list" style="list-style: disc; padding-left: 20px;">
+                                    ${data.extracted_criteria.exclusion.map(c => `<li>${c}</li>`).join("")}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    showAlert("protocolAlert", `Error: ${data.error}`, "error");
+                }
+            } catch (error) {
+                loading.style.display = "none";
+                showAlert("protocolAlert", `Error: ${error.message}`, "error");
+            }
+        }
+        
+        async function checkEligibility() {
+            const protocolId = document.getElementById("protocolSelect").value;
+            const patientName = document.getElementById("patientName").value;
+            const ehrText = document.getElementById("ehrText").value;
+            
+            if (!protocolId || !patientName || !ehrText) {
+                showAlert("eligibilityAlert", "All fields required", "error");
+                return;
+            }
+            
+            const loading = document.getElementById("eligibilityLoading");
+            const alert = document.getElementById("eligibilityAlert");
+            const result = document.getElementById("eligibilityResult");
+            
+            loading.style.display = "block";
+            alert.innerHTML = "";
+            result.innerHTML = "";
+            
+            try {
+                const response = await fetch("/api/check-eligibility", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        protocol_id: protocolId,
+                        patient_name: patientName,
+                        ehr_text: ehrText
+                    })
+                });
+                
+                const data = await response.json();
+                loading.style.display = "none";
+                
+                if (response.ok) {
+                    const recommendation = data.recommendation;
+                    const badgeClass = recommendation === "ELIGIBLE" ? "eligible" : 
+                                     recommendation === "INELIGIBLE" ? "ineligible" : "review";
+                    
+                    showAlert("eligibilityAlert", `✓ Eligibility check completed: ${data.decision_id}`, "success");
+                    
+                    result.innerHTML = `
+                        <div class="result">
+                            <div class="result-section">
+                                <h3>Decision Result</h3>
+                                <span class="badge ${badgeClass}">${recommendation}</span>
+                                <div class="score">${data.eligibility_score}/100</div>
+                            </div>
+                            <div class="result-section">
+                                <h3>Reasoning Chain</h3>
+                                <ul class="reasoning-list">
+                                    ${data.reasoning.map(r => `<li>${r}</li>`).join("")}
+                                </ul>
+                            </div>
+                            ${data.flags.length > 0 ? `
+                                <div class="result-section">
+                                    <h3>⚠️ Flags</h3>
+                                    <ul class="reasoning-list" style="color: #d9534f;">
+                                        ${data.flags.map(f => `<li>${f}</li>`).join("")}
+                                    </ul>
+                                </div>
+                            ` : ""}
+                            <div class="result-section">
+                                <h3>Audit Trail ID</h3>
+                                <p style="font-family: monospace; color: #667eea; font-weight: 600;">${data.decision_id}</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    showAlert("eligibilityAlert", `Error: ${data.error}`, "error");
+                }
+            } catch (error) {
+                loading.style.display = "none";
+                showAlert("eligibilityAlert", `Error: ${error.message}`, "error");
+            }
+        }
+        
+        async function loadDecisions() {
+            try {
+                const response = await fetch("/api/decisions");
+                const decisions = await response.json();
+                
+                const container = document.getElementById("decisionsList");
+                if (decisions.length === 0) {
+                    container.innerHTML = "<p style='color: #999;'>No decisions yet.</p>";
+                    return;
+                }
+                
+                container.innerHTML = `
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <thead style="background: #f5f5f5;">
+                            <tr>
+                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">Decision ID</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">Patient</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">Protocol</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #ddd;">Recommendation</th>
+                                <th style="padding: 8px; text-align: center; border-bottom: 2px solid #ddd;">Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${decisions.map(d => `
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 8px; color: #667eea; font-weight: 600;">${d.decision_id}</td>
+                                    <td style="padding: 8px;">${d.patient_name}</td>
+                                    <td style="padding: 8px;">${d.protocol_id}</td>
+                                    <td style="padding: 8px;">
+                                        <span class="badge ${d.recommendation.toLowerCase()}">${d.recommendation}</span>
+                                    </td>
+                                    <td style="padding: 8px; text-align: center; font-weight: 600;">${d.score}</td>
+                                </tr>
+                            `).join("")}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                document.getElementById("decisionsList").innerHTML = `
+                    <div class="alert error">Error loading decisions: ${error.message}</div>
+                `;
+            }
+        }
+        
+        async function exportAuditReport() {
+            try {
+                const response = await fetch("/api/export-audit-report");
+                const report = await response.json();
+                
+                const container = document.getElementById("auditReport");
+                container.innerHTML = `
+                    <div class="audit-trail">
+                        <pre>${JSON.stringify(report, null, 2)}</pre>
+                    </div>
+                    <button onclick="downloadAuditReport()" style="margin-top: 16px;">📥 Download JSON</button>
+                `;
+            } catch (error) {
+                document.getElementById("auditReport").innerHTML = `
+                    <div class="alert error">Error exporting audit report: ${error.message}</div>
+                `;
+            }
+        }
+        
+        function downloadAuditReport() {
+            fetch("/api/export-audit-report")
+                .then(r => r.json())
+                .then(data => {
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `audit-report-${new Date().toISOString().split("T")[0]}.json`;
+                    a.click();
+                });
+        }
+        
+        function showAlert(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="alert ${type}">${message}</div>`;
+        }
+        
+        function switchTab(tabName) {
+            document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+            document.querySelectorAll(".tab").forEach(el => el.classList.remove("active"));
+            document.getElementById(tabName).classList.add("active");
+            event.target.classList.add("active");
+        }
+    </script>
+</body>
+</html>

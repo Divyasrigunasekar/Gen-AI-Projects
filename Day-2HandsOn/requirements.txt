@@ -1,0 +1,14 @@
+# Backend setup
+fastapi
+uvicorn
+python-multipart
+python-dotenv
+
+# AI stack
+langchain
+langchain-community
+langchain-groq
+pypdf
+chromadb
+tiktoken
+sentence-transformers
