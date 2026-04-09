@@ -57,3 +57,4 @@ instance/
 .env.local
 .env.*.local
 apikey.txt
+mcp.json

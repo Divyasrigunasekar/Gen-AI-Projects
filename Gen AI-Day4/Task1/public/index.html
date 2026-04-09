@@ -1,0 +1,38 @@
+<!DOCTYPE strict>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Keyword Extractor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Key<span class="highlight">Sync</span></h1>
+            <p>Paste any text to extract the most relevant keywords instantly.</p>
+        </header>
+
+        <div class="extractor-card">
+            <textarea id="inputText" placeholder="Paste your text here..."></textarea>
+            <button id="extractBtn">
+                <span class="btn-text">Extract Keywords</span>
+                <div class="loader" id="loader" style="display: none;"></div>
+            </button>
+        </div>
+
+        <div class="results" id="resultsContainer">
+            <h3>Extracted Keywords</h3>
+            <div id="keywordsOutput" class="keywords-wrapper">
+                <!-- Keywords will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
